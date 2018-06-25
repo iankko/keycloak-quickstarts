@@ -118,7 +118,7 @@
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-enforcer-plugin</artifactId>
                         <version>${version.enforcer.maven.plugin}</version>
-                        <executions>
+<!--                        <executions>
                             <execution>
                                 <id>enforce-files-exist</id>
                                 <goals>
@@ -136,6 +136,7 @@
                                 </configuration>
                             </execution>
                         </executions>
+-->
                     </plugin>
 
                     <plugin>
