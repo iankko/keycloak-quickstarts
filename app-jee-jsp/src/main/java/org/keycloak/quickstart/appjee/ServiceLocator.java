@@ -26,33 +26,41 @@ import java.net.URL;
  */
 public class ServiceLocator {
 
-    public static URL getServiceUrl(HttpServletRequest req) {
+       
+       private static final String SERVICE_URI_INIT_PARAM_NAME = "serviceUrl";
 
-        String uri = null;
-        try {
-            uri = System.getProperty("service.url");
-            if (uri != null) {
-                return new URL(uri);
-            }
+       public static URL getServiceUrl(HttpServletRequest req) {
+               URL serviceUrl = null;
+               
+               try {
+                       String url = req.getServletContext().getInitParameter(SERVICE_URI_INIT_PARAM_NAME);
+                   if (url != null && !url.contains("localhost")){
+                       try {
+                                       serviceUrl = new URL(url);
+                                       return serviceUrl;
+                               } catch (MalformedURLException e){
+                                       throw new RuntimeException("Malformed URL: " + url);
+                               }
+                   }
+       
+                       String host = req.getLocalAddr();
+       
+                       if (host.equals("localhost")) {
+                               try {
+                                       host = java.net.InetAddress.getLocalHost().getHostAddress();
+                               } catch (Exception e) {
+                               }
+                       }
+                       
+                       try {
+                               serviceUrl = new URL("http://" + host + ":8080/service");
+                               return serviceUrl;
+                       } catch (MalformedURLException e){
+                               throw new RuntimeException("Malformed URL: " + host);
+                       }
+               } finally {
+                       System.out.println("Using Service URL " + serviceUrl);
+               }
+       }
 
-            uri = System.getenv("SERVICE_URL");
-            if (uri != null) {
-                return new URL(uri);
-            }
-
-            URL requestUrl = new URL(req.getRequestURL().toString());
-
-            String host = requestUrl.getHost();
-            String schema = requestUrl.getProtocol();
-            String port = requestUrl.getPort() != -1 ? (":" + requestUrl.getPort()) : "";
-
-            uri = schema + "://" + host + port + "/service";
-            return new URL(uri);
-
-        } catch (MalformedURLException e) {
-            throw new RuntimeException("Malformed url: " + uri);
-        } finally {
-            System.out.println("Service url: " + uri);
-        }
-    }
 }
